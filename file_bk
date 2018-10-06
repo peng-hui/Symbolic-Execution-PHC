@@ -1,3 +1,9 @@
+
+Block#1
+    Stmt_Function<cmp>
+    Terminal_Return
+        expr: LITERAL(1)
+
 Function cmp():
 Block#1
     Expr_Param
@@ -17,29 +23,24 @@ Block#1
 
 Block#2
     Parent: Block#1
-    Expr_BinaryOp_Plus
-        left: LITERAL(1)
-        right: Var#1<$x>
-        result: Var#4
     Expr_Assign
-        var: Var#5<$z>
-        expr: Var#4
-        result: Var#6
+        var: Var#4<$z>
+        expr: LITERAL(1)
+        result: Var#5
     Stmt_Jump
         target: Block#4
 
 Block#3
     Parent: Block#1
     Expr_Assign
-        var: Var#7<$z>
-        expr: Var#1<$x>
-        result: Var#8
+        var: Var#6<$z>
+        expr: LITERAL(2)
+        result: Var#7
     Stmt_Jump
         target: Block#4
 
 Block#4
     Parent: Block#2
     Parent: Block#3
-    Var#9<$z> = Phi(Var#5<$z>, Var#7<$z>)
     Terminal_Return
-        expr: Var#9<$z>
+        expr: LITERAL(NULL)
