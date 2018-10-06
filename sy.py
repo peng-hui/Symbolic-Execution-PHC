@@ -1,9 +1,10 @@
 from z3 import *
 import unicodedata as uni
-##
+'''
 # @CstList set the list of Solvers which store the constraints
 # each time when update the solver, just And the existing condition
 # then x
+'''
 CstList = []
 s = Solver()
 s.add(True)
@@ -46,40 +47,44 @@ def Function(CstIn):
                 If_block_split = block[j+2].split('Block#')
                 CstList[int(If_block_split[1])].add(If_Cst)
                 Else_block_split = block[j+3].split('Block#')
-                CstList[int(Else_block_split[1])].add(Not(If_Cst))
-                
+                CstList[int(Else_block_split[1])].add(Not(If_Cst))  
             else:
                 continue
     return CstOut
-                
-def Expr_Param(code):
-    code_split = code.split('\n');
 
-def Expr_BinaryOp_Smaller(left, right, result):
+def Expr_Param(name, var):
+    # here simplly ignore name first
+    idx = var.find('<')
+    if(idx == -1):
+        idx = len(var)
+    Var[var[4: idx]] = True
     return
 
-def Stmt_JumpIf(CstIn,cond):
+
+def Expr_BinaryOp_Smaller(left, right, result):
+    lidx = left.find('<')
+    if(lidx == -1):
+        lidx = len(left)
+    ridx = right.find('<')
+    if(ridx == -1):
+        ridx = len(right)
+    reidx = result.find('<')
+    if(reidx == -1):
+        reidx = len(result)
+    new_Cst = Var[left[4:lidx]] < Var[right[4:ridx]]
+    Var[result[4: reidx]]= new_Cst
+    return
+
+'''
+This function is to calculate Jump If Conditon
+@ param CstIn: Constraint Input
+@ param cond: the condition from condition statement, php-cfg
+@ return New_Cst: return the New Constraints of If statement
+'''
+def JumpIfCond(CstIn,cond):
     idx = cond.find('<')
+    if(idx == -1):
+        idx = len(cond)
     Var_idx = int(cond[4:idx])
     new_Cst = CstIn And Var[Var_idx] != 0
     return new_Cst
-    
-
-
-
-
-def Var_Idx(st):
-    if(st[0:3] != 'Var#'):
-        return False
-    re = 0
-    for i < len(st)-4:
-        if(nui.isdigit(st[i+4])):
-            re = re*10 + int(st[i+4])
-        else:
-            break
-    return re
-
-        
-
-
-Function()
