@@ -1,11 +1,17 @@
 #!/usr/bin/python
 '''
-@ file: This is the simple draft about symbolic execution, which 
+@ file: This is a simple draft of symbolic execution with PHP, which 
         uses the CFG from php-cfg.
 '''
 
 from z3 import *
 import unicodedata as uni
+#class SEFunction:
+# TODO set a class to it
+# TODO Other nodes that have to be handled
+# TODO United Nodes and function 'Phi'
+
+
 '''
 # @CstList set the list of Solvers which store the constraints
 # each time when update the solver, just And the existing condition
@@ -35,10 +41,7 @@ def Function(CstIn):
         print(script[0:8])
         return False
     CstOut = CstIn
-    Blocks = script.split('\nBlock#')
-    # temperally initializa a List for the constraints of each block.
-    i = 1
-    while i < len(Blocks):
+    Blocks = script.split('\nBlock#') # temperally initializa a List for the constraints of each block.  i = 1 while i < len(Blocks):
         block = Blocks[i].split('\n')
         print(len(block))
         j = 0
@@ -267,6 +270,7 @@ This function is to calculate Jump If Conditon
 @ param cond: the condition from condition statement, php-cfg
 @ return New_Cst: return the New Constraints of If statement
 '''
+
 def JumpIfCond(cond):
     idx = cond.find('<')
     if(idx == -1):
@@ -276,4 +280,5 @@ def JumpIfCond(cond):
     #print(new_Cst, type(new_Cst))
     return new_Cst
 
+# run here
 Function(True)
