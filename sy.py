@@ -6,10 +6,15 @@
 
 from z3 import *
 import unicodedata as uni
-#class SEFunction:
+# class SEFunction: which can be put off since now we only focus on single function
 # TODO set a class to it
 # TODO Other nodes that have to be handled
 # TODO United Nodes and function 'Phi'
+# TODO Identify LOOPs(Path goes from smaller node to larger one??)
+# TODO Support user input identifycation, which should be in Array_Fetch
+#      But how to mark it when analysize the loop condition?
+# TODO Where to start???
+# TODO Identify which path is reachable there.
 
 
 '''
@@ -30,7 +35,7 @@ for k in range(10):
     Parents.append([])
     #print( Var[k], type(Var[k]))
 
-def Function(CstIn):
+def SEFunction(CstIn):
     # read the cfg in
     # temperally read a modified input fuction-cfg file named 'file.txt'
     script = open('file.txt','r')
@@ -98,6 +103,12 @@ def Function(CstIn):
         print(CstList[i], Parents[i])
     return CstOut
 
+'''
+@ function: this is to deal with array fetch in php
+'''
+def Expr_ArrayDimFetch(var, dim, result):
+
+
 
 def Parent(pblock):
     return int(pblock[6:])
@@ -105,7 +116,6 @@ def Parent(pblock):
 # TODO
 def Stmt_Jump(target):
     return
-
 '''
 @ function Phi is the joining point in the control flow graph.
            It requires to handle more than two inputs from its
@@ -281,4 +291,4 @@ def JumpIfCond(cond):
     return new_Cst
 
 # run here
-Function(True)
+SEFunction(True)
