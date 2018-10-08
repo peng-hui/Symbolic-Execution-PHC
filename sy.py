@@ -3,15 +3,15 @@
 @ file: This is a simple draft of symbolic execution with PHP, which 
         uses the CFG from php-cfg.
 '''
+class ParseFunc:
+    def __init__(self, script):
+        return
+    
 
 from z3 import *
 import unicodedata as uni
-<<<<<<< HEAD
 # class SEFunction: which can be put off since now we only focus on single function
 # TODO set a class to it
-=======
-#class SEFunction:
->>>>>>> b882c5cad8492136974de25ccf7687f54b98d8b8
 # TODO Other nodes that have to be handled
 # TODO United Nodes and function 'Phi'
 # TODO Identify LOOPs(Path goes from smaller node to larger one??)
@@ -25,7 +25,11 @@ import unicodedata as uni
 # @CstList set the list of Solvers which store the constraints
 # each time when update the solver, just And the existing condition
 # then x
+these global variables should should be done more procisely
+but at this moment, just ignore it. haha
 '''
+ReachNode = []
+NodePath = []
 CstList = []
 s = Solver()
 s.add(True)
@@ -33,12 +37,20 @@ Var = []
 Parents = []
 for k in range(10):
     s = Solver()
+    ReachNode.append(False)
     s.add(True)
     CstList.append(s)
+    NodePath.append([])
     Var.append(Real('var' + str(k)))#Variable formats as  Var_i
     Parents.append([])
     #print( Var[k], type(Var[k]))
 
+
+
+'''
+@function:      parse the scripts of CFG into Blocks
+@param:
+'''
 def SEFunction(CstIn):
     # read the cfg in
     # temperally read a modified input fuction-cfg file named 'file.txt'
@@ -55,76 +67,104 @@ def SEFunction(CstIn):
     while i < len(Blocks):
         block = Blocks[i].split('\n')
         print(len(block))
-        j = 0
-        while j  < len(block):
-            # handle types with corresponding functions specified
-            block[j] = block[j].strip()
-            if block[j].isdigit():
-                print('Begin of block')
-            elif block[j].find('Parent') != -1:
-                Parents[i].append(Parent(block[j][8:])) # nothing with parent, not deal with it at this moment.
-            elif block[j] == 'Expr_Assign':
-                Expr_Assign(block[j + 1].strip()[5:], block[j + 2].strip()[6:], block[j + 3].strip()[8:])
-                j += 3
-            elif block[j] == 'Stmt_Jump':
-                Stmt_Jump(block[j+1])
-                j += 1
-            elif block[j] == 'Terminal_Return':
-                Terminal_Return(block[j+1].strip()[6:])
-                j += 1
-            elif(block[j]== 'Expr_Param'):
-                block[j+1] = block[j+1].strip()
-                block[j+2] = block[j+2].strip()
-                name = block[j+1][6:]
-                var = block[j+2][8:]
-                Expr_Param(name, var)
-                j += 2
-            elif block[j] == 'Expr_BinaryOp_Smaller':
-                Expr_BinaryOp_Smaller(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])
-                j += 3
-            elif block[j] == 'Stmt_JumpIf':
-                tmp = block[j+1].strip()[6:]
-                If_Cst = JumpIfCond(tmp)
-                If_block_split = block[j+2].split('Block#')
-                CstList[int(If_block_split[1])].add(If_Cst)
-                Else_block_split = block[j+3].split('Block#')
-                CstList[int(Else_block_split[1])].add(Not(If_Cst))  
-                j += 3
-            elif block[j] == 'Expr_BinaryOp_Plus':
-                Expr_BinaryOp_Plus(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])
-                j += 3
-            elif block[j].find('Phi') != -1:
-                CstList[i].add(Phi(block[j], i)) # deal with all stuff with function phi
-                # this function may be complex since it should combine the constraints together to the next variable
-            else:
-                print("ERROR: unknown expr/stmt")
-                print(block[j])
+        #NodePath[i] = NodePath[i-1]
+        #NodePath[i].append(i)
+
+'''
+@ function:     travel each node recursively
+@ param node:   node that currently reach
+@ return:       Null
+'''
+def TravelNode(node):
+    block = Blocks[node]
+    j = 0
+    while j  < len(block):
+        # handle types with corresponding functions specified
+        block[j] = block[j].strip() 
+        if block[j].isdigit():
+            print('Begin to travel block', block[j])
+        elif block[j].find('Parent') != -1:
+            Parents[node].append(Parent(block[j][8:])) # nothing with parent, not deal with it at this moment.
+        elif block[j] == 'Expr_Assign':
+            Expr_Assign(block[j + 1].strip()[5:], block[j + 2].strip()[6:], block[j + 3].strip()[8:])
+            j += 3
+        elif block[j] == 'Stmt_Jump': 
+            Stmt_Jump(block[j+1].strip()[8:], node) # there may be a loop
             j += 1
+        elif block[j] == 'Terminal_Return':
+            Terminal_Return(block[j+1].strip()[6:])
+            j += 1
+        elif(block[j]== 'Expr_Param'):
+            block[j+1] = block[j+1].strip()
+            block[j+2] = block[j+2].strip()
+            name = block[j+1][6:]
+            var = block[j+2][8:]
+            Expr_Param(name, var)
+            j += 2
+        elif block[j] == 'Expr_BinaryOp_Smaller':
+            Expr_BinaryOp_Smaller(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])
+            j += 3
+        elif block[j] == 'Stmt_JumpIf':
+            tmp = block[j+1].strip()[6:]
+            If_Cst = JumpIfCond(tmp)
+            If_block_split = block[j+2].split('Block#')
+            CstList[int(If_block_split[1])].add(If_Cst)
+            TravelNode(If_block_split[1])
+            Else_block_split = block[j+3].split('Block#')
+            CstList[int(Else_block_split[1])].add(Not(If_Cst))  
+            TravelNode(Else_block_split[1])
+            j += 3
+        elif block[j] == 'Expr_BinaryOp_Plus':
+            Expr_BinaryOp_Plus(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])
+            j += 3
+        elif block[j].find('Phi') != -1:
+            a = 1 # make space
+            #CstList[i].add(Phi(block[j], i)) # deal with all stuff with function phi
+            # this function may be complex since it should combine the constraints together to the next variable
+            # something need to do here
+        else:
+            print("ERROR: unknown expr/stmt")
+            print(block[j])
+        j += 1
                 
         i += 1
     '''
     print CstList to test
     '''
+
+'''
     for i in range(len(Blocks)):
         print('Block', i)
         print(CstList[i])
         print(CstList[i].check())
         if(CstList[i].check()):
+            ReachNode[i] = True
             print(CstList[i].model())
-    return CstOut
+'''
+    return
 
 '''
 @ function: this is to deal with array fetch in php
 '''
 def Expr_ArrayDimFetch(var, dim, result):
-
-
-
+    return
+'''
+@function:      Find the parental node
+@param pblock:  Parent block
+@return:        parental block number
+'''
 def Parent(pblock):
     return int(pblock[6:])
 
 # TODO
-def Stmt_Jump(target):
+'''
+Generally, Stmt_Jump happens when there is a loop...
+'''
+def Stmt_Jump(target, nblock):
+    target = int(target[6:])
+    if(target in NodePath[nblock]):
+        NodePath[nblock].append(target)
+        print('There is a LOOP:', NodePath) # need to mark
     return
 '''
 @ function Phi is the joining point in the control flow graph.
@@ -172,6 +212,11 @@ def Phi(expr, nblock):
         cst = Or(cst,tcst)
     return cst
 
+'''
+@function:      return expression or value
+@param expr:    expression
+@return:        NULL
+'''
 def Terminal_Return(expr):
     evalue = 'error'
     if expr.find('Var') != -1:
@@ -183,8 +228,12 @@ def Terminal_Return(expr):
         eidx = expr.find(')')
         evalue = int(expr[8:eidx])
     return evalue
-
-
+'''
+@function:      ADD
+@param left:    left param
+@param right:   right param
+@param result:  result
+'''
 def Expr_BinaryOp_Plus(left, right, result):
     lvalue = 'error'
     rvalue = 'error'
@@ -214,7 +263,12 @@ def Expr_BinaryOp_Plus(left, right, result):
     #print('new_Cst',new_Cst)
     Var[int(result[4: reidx])]= new_Cst
     return
-    
+'''
+@function:      assign to variables
+@param var:     
+@param expr:
+@param result:
+'''
 def Expr_Assign(var, expr, result):
     evalue = 'error'
     if expr.find('Var') != -1:
@@ -239,6 +293,9 @@ def Expr_Assign(var, expr, result):
     return
 
 # TODO?? seems if initialize at the beginning, then not necessary to do anything here.
+'''
+need to mark variables that user controls. or to mark whether the block controled
+'''
 def Expr_Param(name, var):
     # here simplly ignore name first
     return
@@ -253,7 +310,9 @@ def Expr_Param(name, var):
     return
 '''
 
-
+'''
+compare
+'''
 def Expr_BinaryOp_Smaller(left, right, result):
     lvalue = 'error'
     rvalue = 'error'
