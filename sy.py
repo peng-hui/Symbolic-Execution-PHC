@@ -6,8 +6,12 @@
 
 from z3 import *
 import unicodedata as uni
+<<<<<<< HEAD
 # class SEFunction: which can be put off since now we only focus on single function
 # TODO set a class to it
+=======
+#class SEFunction:
+>>>>>>> b882c5cad8492136974de25ccf7687f54b98d8b8
 # TODO Other nodes that have to be handled
 # TODO United Nodes and function 'Phi'
 # TODO Identify LOOPs(Path goes from smaller node to larger one??)
@@ -46,7 +50,9 @@ def SEFunction(CstIn):
         print(script[0:8])
         return False
     CstOut = CstIn
-    Blocks = script.split('\nBlock#') # temperally initializa a List for the constraints of each block.  i = 1 while i < len(Blocks):
+    Blocks = script.split('\nBlock#') # temperally initializa a List for the constraints of each block. 
+    i = 1 
+    while i < len(Blocks):
         block = Blocks[i].split('\n')
         print(len(block))
         j = 0
@@ -100,7 +106,11 @@ def SEFunction(CstIn):
     print CstList to test
     '''
     for i in range(len(Blocks)):
-        print(CstList[i], Parents[i])
+        print('Block', i)
+        print(CstList[i])
+        print(CstList[i].check())
+        if(CstList[i].check()):
+            print(CstList[i].model())
     return CstOut
 
 '''
@@ -269,7 +279,7 @@ def Expr_BinaryOp_Smaller(left, right, result):
         reidx = len(result)
     #print(left, right, result)
     #print(lidx, ridx, reidx)
-    new_Cst = rvalue < rvalue
+    new_Cst = lvalue < rvalue
     #print('new_Cst',new_Cst)
     Var[int(result[4: reidx])]= new_Cst
     return
