@@ -7,7 +7,6 @@
 from z3 import *
 import unicodedata as uni
 #class SEFunction:
-# TODO set a class to it
 # TODO Other nodes that have to be handled
 # TODO United Nodes and function 'Phi'
 
@@ -41,7 +40,9 @@ def Function(CstIn):
         print(script[0:8])
         return False
     CstOut = CstIn
-    Blocks = script.split('\nBlock#') # temperally initializa a List for the constraints of each block.  i = 1 while i < len(Blocks):
+    Blocks = script.split('\nBlock#') # temperally initializa a List for the constraints of each block. 
+    i = 1 
+    while i < len(Blocks):
         block = Blocks[i].split('\n')
         print(len(block))
         j = 0
@@ -95,7 +96,11 @@ def Function(CstIn):
     print CstList to test
     '''
     for i in range(len(Blocks)):
-        print(CstList[i], Parents[i])
+        print('Block', i)
+        print(CstList[i])
+        print(CstList[i].check())
+        if(CstList[i].check()):
+            print(CstList[i].model())
     return CstOut
 
 
@@ -259,7 +264,7 @@ def Expr_BinaryOp_Smaller(left, right, result):
         reidx = len(result)
     #print(left, right, result)
     #print(lidx, ridx, reidx)
-    new_Cst = rvalue < rvalue
+    new_Cst = lvalue < rvalue
     #print('new_Cst',new_Cst)
     Var[int(result[4: reidx])]= new_Cst
     return
