@@ -70,10 +70,9 @@ class ParseFunc(object):
                 self.CstList[int(Else_block_split[1])].add(self.CstList[nblock].assertions())
                 self.CstList[int(Else_block_split[1])].add(Not(If_Cst)) #need to add current cst
                 ###########
-                self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
-                self.TravelBlock(int(If_block_split[1]))
+                #self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
+                #self.TravelBlock(int(If_block_split[1]))
 
-                '''
                 pid = os.fork()
                 if pid == 0:
                     self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
@@ -81,7 +80,6 @@ class ParseFunc(object):
                 else:
                     self.BlockPath[int(Else_block_split[1])] = self.BlockPath[nblock][:]
                     self.TravelBlock(int(Else_block_split[1]))
-                '''
                 j += 3
             elif block[j] == 'Expr_BinaryOp_Plus':
                 self.Expr_BinaryOp_Plus(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])

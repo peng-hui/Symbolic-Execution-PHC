@@ -90,7 +90,7 @@ class ParseFunc(object):
                 self.Phi(block[j].strip())# deal with all stuff with function phi
             else:
                 print("ERROR: unknown expr/stmt")
-                print(block[j])
+                #print(block[j])
             j +=1
 
     '''
