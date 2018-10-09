@@ -1,3 +1,92 @@
+
+Block#1
+    Expr_ArrayDimFetch
+        var: Var#1<$_GET>
+        dim: LITERAL('X')
+        result: Var#2
+    Expr_Assign
+        var: Var#3<$k_get>
+        expr: Var#2
+        result: Var#4
+    Expr_ArrayDimFetch
+        var: Var#5<$_POST>
+        dim: LITERAL('y')
+        result: Var#6
+    Expr_Assign
+        var: Var#7<$k_post>
+        expr: Var#6
+        result: Var#8
+    Expr_ArrayDimFetch
+        var: Var#9<$_COOKIE>
+        dim: LITERAL('y')
+        result: Var#10
+    Expr_Assign
+        var: Var#11<$k_cookie>
+        expr: Var#10
+        result: Var#12
+    Expr_ArrayDimFetch
+        var: Var#13<$_REQUEST>
+        dim: LITERAL('r')
+        result: Var#14
+    Expr_Assign
+        var: Var#15<$k_request>
+        expr: Var#14
+        result: Var#16
+    Expr_ArrayDimFetch
+        var: Var#17<$_SERVER>
+        dim: LITERAL('k')
+        result: Var#18
+    Expr_Assign
+        var: Var#19<$k_server>
+        expr: Var#18
+        result: Var#20
+    Expr_ArrayDimFetch
+        var: Var#21<$_SESSION>
+        dim: LITERAL('k')
+        result: Var#22
+    Expr_Assign
+        var: Var#23<$k_SESSION>
+        expr: Var#22
+        result: Var#24
+    Expr_Array
+        values[0]: LITERAL(1)
+        values[1]: LITERAL(2)
+        result: Var#25
+    Expr_Assign
+        var: Var#26<$tmp>
+        expr: Var#25
+        result: Var#27
+    Expr_ConstFetch
+        name: LITERAL('tmp')
+        result: Var#28
+    Expr_ArrayDimFetch
+        var: Var#28
+        dim: LITERAL(0)
+        result: Var#29
+    Expr_Assign
+        var: Var#30<$kk>
+        expr: Var#29
+        result: Var#31
+    Stmt_Function<cmp>
+    Stmt_Switch
+        cond: Var#30<$kk>
+        cases[0]: LITERAL(0)
+        cases[1]: LITERAL(1)
+        cases[2]: LITERAL(2)
+        targets[0]: Block#2
+        targets[1]: Block#2
+        targets[2]: Block#2
+        default: Block#2
+
+Block#2
+    Parent: Block#1
+    Expr_Assign
+        var: Var#32<$ttt>
+        expr: LITERAL(1)
+        result: Var#33
+    Terminal_Return
+        expr: LITERAL(1)
+
 Function cmp():
 Block#1
     Expr_Param
@@ -30,16 +119,37 @@ Block#2
 
 Block#3
     Parent: Block#1
-    Expr_Assign
-        var: Var#7<$z>
-        expr: Var#1<$x>
-        result: Var#8
-    Stmt_Jump
-        target: Block#4
+    Expr_BinaryOp_Equal
+        left: Var#1<$x>
+        right: Var#2<$y>
+        result: Var#7
+    Stmt_JumpIf
+        cond: Var#7
+        if: Block#5
+        else: Block#6
 
 Block#4
     Parent: Block#2
-    Parent: Block#3
-    Var#9<$z> = Phi(Var#5<$z>, Var#7<$z>)
+    Parent: Block#5
+    Parent: Block#6
+    Var#8<$z> = Phi(Var#5<$z>, Var#9<$z>, Var#10<$z>)
     Terminal_Return
-        expr: Var#9<$z>
+        expr: Var#8<$z>
+
+Block#5
+    Parent: Block#3
+    Expr_Assign
+        var: Var#9<$z>
+        expr: Var#1<$x>
+        result: Var#11
+    Stmt_Jump
+        target: Block#4
+
+Block#6
+    Parent: Block#3
+    Expr_Assign
+        var: Var#10<$z>
+        expr: Var#2<$y>
+        result: Var#12
+    Stmt_Jump
+        target: Block#4

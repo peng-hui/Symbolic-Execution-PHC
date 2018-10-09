@@ -7,16 +7,16 @@ from z3 import *
 import unicodedata as uni
 import os
 
-# TODO Other nodes that have to be handled
-# TODO Identify LOOPs(Path goes from smaller node to larger one??)
-# TODO Support user input identifycation, which should be in Array_Fetch #      But how to mark it when analysize the loop condition?
-# TODO Where to start???
-# TODO Identify which path is reachable there.
+# TODO Identify LOOPs===I guess may be Stmt_Jump.. if the jump target is visited, then it is a loop??
+# TODO Support user input identifycation, which should be in Array_Fetch
+# TODO ARRAY_MAKE
+# TODO array dim fetch value
 
 class ParseFunc(object):
     BlockPath = []
     CstList = []
     Var = []
+    Loop = []
     Parents = []
     block = []
     #read script and read it into blocks
@@ -31,6 +31,16 @@ class ParseFunc(object):
         return
 
     def TravelBlock(self, nblock):
+        if(self.CstList[nblock].check() == unsat):
+            print('Block', nblock, 'Unreachable')
+            print(self.CstList[nblock])
+            print(self.BlockPath[nblock])
+            return
+        if nblock in self.BlockPath[nblock]:
+            print('Block', nblock, 'alredy in Path') #to Check loop// this block appeared before
+            self.Loop.append(nblock)
+            self.BlockPath[nblock].append(nblock)
+            return
         self.BlockPath[nblock].append(nblock)
         #print('path',nblock, self.BlockPath[nblock])
         block = self.block[nblock]
@@ -43,13 +53,18 @@ class ParseFunc(object):
             elif block[j].find('Parent') != -1:
                 self.Parents[nblock].append(int(block[j][14:]))
                 #self.Parents[nblock].append(self.Parent(block[j][8:])) # nothing with parent, not deal with it at this moment.
+            elif block[j] == 'Expr_Array':
+                gothrough = 1
+            elif block[j] == 'Expr_ArrayDimFetch':
+                self.Expr_ArrayDimFetch(block[j+1].strip()[5:], block[j+2].strip()[5:], result.strip()[8:])
             elif block[j] == 'Expr_Assign':
                 self.Expr_Assign(block[j + 1].strip()[5:], block[j + 2].strip()[6:], block[j + 3].strip()[8:])
                 j += 3
             elif block[j] == 'Stmt_Jump': 
-                self.CstList[int(block[j+1].strip()[14:])].add(self.CstList[nblock].assertions())
-                self.BlockPath[int(block[j+1].strip()[14:])] = self.BlockPath[nblock][:]
-                self.TravelBlock(int(block[j+1].strip()[14:])) # there may be a loop
+                n = int(block[j+1].strip()[14:])
+                self.CstList[n].add(self.CstList[nblock].assertions())
+                self.BlockPath[n] = self.BlockPath[nblock][:]
+                self.TravelBlock(n) # there may be a loop
                 j += 1
             elif block[j] == 'Terminal_Return':
                 self.Terminal_Return(block[j+1].strip()[6:])
@@ -70,10 +85,8 @@ class ParseFunc(object):
                 self.CstList[int(Else_block_split[1])].add(self.CstList[nblock].assertions())
                 self.CstList[int(Else_block_split[1])].add(Not(If_Cst)) #need to add current cst
                 ###########
-                self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
-                self.TravelBlock(int(If_block_split[1]))
-
-                '''
+                #self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
+                #self.TravelBlock(int(If_block_split[1]))
                 pid = os.fork()
                 if pid == 0:
                     self.BlockPath[int(If_block_split[1])] = self.BlockPath[nblock][:]
@@ -81,7 +94,6 @@ class ParseFunc(object):
                 else:
                     self.BlockPath[int(Else_block_split[1])] = self.BlockPath[nblock][:]
                     self.TravelBlock(int(Else_block_split[1]))
-                '''
                 j += 3
             elif block[j] == 'Expr_BinaryOp_Plus':
                 self.Expr_BinaryOp_Plus(block[j + 1].strip()[6:], block[j + 2].strip()[7:], block[j + 3].strip()[8:])
@@ -97,7 +109,9 @@ class ParseFunc(object):
     @ function: this is to deal with array fetch in php
     '''
     def Expr_ArrayDimFetch(self, var, dim, result):
-        return var[dim]
+        return
+
+        #return var[dim]
 
     '''
     @function:      Find the parental node
@@ -115,7 +129,6 @@ class ParseFunc(object):
     @ return:  NULL
     it needs to write the result in the CstList and Varaible
     '''
-    # TODO
     def Phi(self, expr):
         nvar = expr.split('Var#')
         r1 = nvar[1].find('<') 
@@ -236,7 +249,6 @@ class ParseFunc(object):
         self.Assign_Element(self.Var, int(result[4: reidx]), evalue) # result is equal to var
         return
 
-    # TODO?? seems if initialize at the beginning, then not necessary to do anything here.
     def Expr_Param(self, name, var):
         idx = var.find('<')
         if(idx == -1):
